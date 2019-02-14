@@ -742,6 +742,13 @@ class NMF(AlgoBase):
 
 class mySVD(SVD):
 
+    def partial_fit(self, trainset):
+
+        AlgoBase.fit(self, trainset)
+        self.sgd(trainset, partial=True)
+
+        return self
+
     def sgd(self, trainset, partial=False):
 
         # OK, let's breathe. I've seen so many different implementation of this
