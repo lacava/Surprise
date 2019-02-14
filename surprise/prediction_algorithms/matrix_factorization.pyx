@@ -146,17 +146,22 @@ class SVD(AlgoBase):
         self.reg_qi = reg_qi if reg_qi is not None else reg_all
         self.random_state = random_state
         self.verbose = verbose
+        self.fitted = False
 
         AlgoBase.__init__(self)
 
-    def fit(self, trainset):
+    def fit(self, trainset, partial=False):
 
         AlgoBase.fit(self, trainset)
-        self.sgd(trainset)
+        self.sgd(trainset, partial)
 
         return self
 
-    def sgd(self, trainset):
+    def partial_fit(self, trainset):
+
+        return self.fit(trainset,partial=True)
+
+    def sgd(self, trainset, partial=False):
 
         # OK, let's breathe. I've seen so many different implementation of this
         # algorithm that I just not sure anymore of what it should do. I've
@@ -215,12 +220,20 @@ class SVD(AlgoBase):
 
         rng = get_rng(self.random_state)
 
-        bu = np.zeros(trainset.n_users, np.double)
-        bi = np.zeros(trainset.n_items, np.double)
-        pu = rng.normal(self.init_mean, self.init_std_dev,
-                        (trainset.n_users, self.n_factors))
-        qi = rng.normal(self.init_mean, self.init_std_dev,
-                        (trainset.n_items, self.n_factors))
+        # if partial fit, start with previous model
+        if partial and self.fitted: 
+            pdb.set_trace()
+            bu = self.bu
+            bi = self.bi
+            pu = self.pu
+            qi = self.qi
+        else:
+            bu = np.zeros(trainset.n_users, np.double)
+            bi = np.zeros(trainset.n_items, np.double)
+            pu = rng.normal(self.init_mean, self.init_std_dev,
+                            (trainset.n_users, self.n_factors))
+            qi = rng.normal(self.init_mean, self.init_std_dev,
+                            (trainset.n_items, self.n_factors))
 
         if not self.biased:
             global_mean = 0
@@ -252,6 +265,7 @@ class SVD(AlgoBase):
         self.bi = bi
         self.pu = pu
         self.qi = qi
+        self.fitted = True
 
     def estimate(self, u, i):
         # Should we cythonize this as well?
@@ -741,13 +755,6 @@ class NMF(AlgoBase):
         return est
 
 class mySVD(SVD):
-
-    def partial_fit(self, trainset):
-
-        AlgoBase.fit(self, trainset)
-        self.sgd(trainset, partial=True)
-
-        return self
 
     def sgd(self, trainset, partial=False):
 
