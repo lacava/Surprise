@@ -72,6 +72,7 @@ class CoClustering(AlgoBase):
         print('calling AlgoBase.fit')
 
         AlgoBase.fit(self, trainset)
+        print('called AlgoBase.fit')
 
         # User and item means
         cdef np.ndarray[np.double_t] user_mean
@@ -87,10 +88,11 @@ class CoClustering(AlgoBase):
         cdef np.ndarray[np.double_t, ndim=2] avg_cocltr
 
         cdef np.ndarray[np.double_t] errors
-        cdef int u, i, r, uc, ic
-        cdef double est
+        cdef int u, i, uc, ic
+        # WGL: I changed ratings to doubles here. 
+        cdef double est, r
 
-        # Randomly assign users and items to intial clusters
+        # # Randomly assign users and items to intial clusters
         rng = get_rng(self.random_state)
         cltr_u = rng.randint(self.n_cltr_u, size=trainset.n_users)
         cltr_i = rng.randint(self.n_cltr_i, size=trainset.n_items)
@@ -100,9 +102,11 @@ class CoClustering(AlgoBase):
         item_mean = np.zeros(self.trainset.n_items, np.double)
         for u in trainset.all_users():
             print('on user',u)
+            print('trainset.ur['+str(u)+']:',trainset.ur[u])
+            print('value:',[r for (_,r) in trainset.ur[u]])
             user_mean[u] = np.mean([r for (_, r) in trainset.ur[u]])
         for i in trainset.all_items():
-            print('on item',u)
+            print('on item',i,':',[r for (_,r) in trainset.ir[i]])
             item_mean[i] = np.mean([r for (_, r) in trainset.ir[i]])
 
         # Optimization loop. This could be optimized a bit by checking if
@@ -176,16 +180,19 @@ class CoClustering(AlgoBase):
         cdef np.ndarray[np.int_t, ndim=2] count_cocltr
 
         # Sum of ratings for entities in each cluster
-        cdef np.ndarray[np.int_t] sum_cltr_u
-        cdef np.ndarray[np.int_t] sum_cltr_i
-        cdef np.ndarray[np.int_t, ndim=2] sum_cocltr
+        # WGL: I changed these to doubles to support continuous ratings.
+        cdef np.ndarray[np.double_t] sum_cltr_u
+        cdef np.ndarray[np.double_t] sum_cltr_i
+        cdef np.ndarray[np.double_t, ndim=2] sum_cocltr
 
         # The averages of each cluster (what will be returned)
         cdef np.ndarray[np.double_t] avg_cltr_u
         cdef np.ndarray[np.double_t] avg_cltr_i
         cdef np.ndarray[np.double_t, ndim=2] avg_cocltr
 
-        cdef int u, i, r, uc, ic
+        cdef int u, i, uc, ic
+        # WGL: I changed ratings to doubles here. 
+        cdef double r
         cdef double global_mean = self.trainset.global_mean
 
         # Initialize everything to zero
@@ -193,9 +200,10 @@ class CoClustering(AlgoBase):
         count_cltr_i = np.zeros(self.n_cltr_i, np.int)
         count_cocltr = np.zeros((self.n_cltr_u, self.n_cltr_i), np.int)
 
-        sum_cltr_u = np.zeros(self.n_cltr_u, np.int)
-        sum_cltr_i = np.zeros(self.n_cltr_i, np.int)
-        sum_cocltr = np.zeros((self.n_cltr_u, self.n_cltr_i), np.int)
+        # WGL: I changed cluster sums to doubles here. 
+        sum_cltr_u = np.zeros(self.n_cltr_u, np.double)
+        sum_cltr_i = np.zeros(self.n_cltr_i, np.double)
+        sum_cocltr = np.zeros((self.n_cltr_u, self.n_cltr_i), np.double)
 
         avg_cltr_u = np.zeros(self.n_cltr_u, np.double)
         avg_cltr_i = np.zeros(self.n_cltr_i, np.double)
