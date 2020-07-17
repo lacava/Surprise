@@ -69,6 +69,7 @@ class CoClustering(AlgoBase):
 
         # All this implementation was hugely inspired from MyMediaLite:
         # https://github.com/zenogantner/MyMediaLite/blob/master/src/MyMediaLite/RatingPrediction/CoClustering.cs
+        print('calling AlgoBase.fit')
 
         AlgoBase.fit(self, trainset)
 
