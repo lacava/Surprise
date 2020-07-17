@@ -50,7 +50,9 @@ class SlopeOne(AlgoBase):
         # Deviation from item i to item j: mean(r_ui - r_uj for u in U_ij)
         cdef np.ndarray[np.double_t, ndim=2] dev
 
-        cdef int u, i, j, r_ui, r_uj
+        cdef int u, i, j 
+        #WGL: changed these to doubles
+        cdef double r_ui, r_uj
 
         AlgoBase.fit(self, trainset)
 
