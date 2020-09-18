@@ -69,10 +69,8 @@ class CoClustering(AlgoBase):
 
         # All this implementation was hugely inspired from MyMediaLite:
         # https://github.com/zenogantner/MyMediaLite/blob/master/src/MyMediaLite/RatingPrediction/CoClustering.cs
-        print('calling AlgoBase.fit')
 
         AlgoBase.fit(self, trainset)
-        print('called AlgoBase.fit')
 
         # User and item means
         cdef np.ndarray[np.double_t] user_mean
@@ -101,12 +99,8 @@ class CoClustering(AlgoBase):
         user_mean = np.zeros(self.trainset.n_users, np.double)
         item_mean = np.zeros(self.trainset.n_items, np.double)
         for u in trainset.all_users():
-            print('on user',u)
-            print('trainset.ur['+str(u)+']:',trainset.ur[u])
-            print('value:',[r for (_,r) in trainset.ur[u]])
             user_mean[u] = np.mean([r for (_, r) in trainset.ur[u]])
         for i in trainset.all_items():
-            print('on item',i,':',[r for (_,r) in trainset.ir[i]])
             item_mean[i] = np.mean([r for (_, r) in trainset.ir[i]])
 
         # Optimization loop. This could be optimized a bit by checking if
